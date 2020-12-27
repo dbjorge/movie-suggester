@@ -1,3 +1,5 @@
+name: CI build/lint/test
+
 on:
   push:
     branches:
