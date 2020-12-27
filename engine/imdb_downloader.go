@@ -47,9 +47,9 @@ func refreshTempFile(rawURLString string) string {
 	if needsRefresh(filePath) {
 		// log.Printf("Refreshing data file at %s", filePath)
 		downloadFile(rawURLString, filePath)
-	} else {
-		// log.Printf("Reusing existing data file at %s", filePath)
-	}
+	} /* else {
+		log.Printf("Reusing existing data file at %s", filePath)
+	} */
 
 	return filePath
 }
