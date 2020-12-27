@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 
@@ -42,14 +43,29 @@ var rootCmd = &cobra.Command{
 			suggestion.RatingCount,
 		)
 
-		if configFile := viper.ConfigFileUsed(); configFile != "" {
-			viper.Set("already-seen", append(alreadySeen, suggestion.PrimaryTitle))
-			// log.Printf("Writing new already-seen list to %s", configFile)
-			if err := viper.WriteConfig(); err != nil {
-				log.Fatal(err)
-			}
-		}
+		updateConfigFileWithNewAlreadySeen(suggestion.PrimaryTitle)
 	},
+}
+
+func updateConfigFileWithNewAlreadySeen(newAlreadySeen string) {
+	alreadySeen := viper.GetStringSlice("already-seen")
+	configFile := viper.ConfigFileUsed()
+	if configFile == "" {
+		ex, err := os.Executable()
+		if err != nil {
+			log.Fatal(err)
+		}
+		exeDir := path.Dir(ex)
+		configFile = path.Join(exeDir, ".movie-suggester.yaml")
+		log.Printf("Creating new config file at %s", configFile)
+		viper.SetConfigFile(configFile)
+	}
+
+	viper.Set("already-seen", append(alreadySeen, newAlreadySeen))
+	// log.Printf("Writing new already-seen list to %s", configFile)
+	if err := viper.WriteConfig(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -88,14 +104,21 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
+		homeDir, err := homedir.Dir()
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		ex, err := os.Executable()
+		if err != nil {
+			log.Fatal(err)
+		}
+		exeDir := path.Dir(ex)
+
 		// Search config in home directory with name ".movie-suggester" (without extension).
-		viper.AddConfigPath(home)
+		viper.AddConfigPath(exeDir)
+		viper.AddConfigPath(".")
+		viper.AddConfigPath(homeDir)
 		viper.SetConfigName(".movie-suggester")
 	}
 
