@@ -9,14 +9,10 @@ import (
 
 var sampleTitle1 Title = Title{
 	tconst: "tc1",
-	name:   "title 1",
-	rating: Unrated,
 }
 
 var sampleTitle2 Title = Title{
 	tconst: "tc2",
-	name:   "title 2",
-	rating: Unrated,
 }
 
 func TestRandTitleCanOutputAllElements(t *testing.T) {
